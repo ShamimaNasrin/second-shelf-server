@@ -38,6 +38,15 @@ async function run() {
             res.send({ isAdmin: user?.userRole === 'Admin' });
         })
 
+        //check the user that already loggedin An Seller or not
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            // console.log(user);
+            res.send({ isSeller: user?.userRole === 'Seller' });
+        })
+
         //create jwt token
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
