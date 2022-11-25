@@ -16,6 +16,17 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
+        const usersCollection = client.db('secondShelf').collection('users');
+
+
+
+        //sent user info to mongodb
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            //console.log(user);
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        });
 
     }
     finally {
