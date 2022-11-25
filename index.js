@@ -29,13 +29,26 @@ async function run() {
             res.send(result);
         });
 
+        //check the user that already loggedin An Admin or not
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            // console.log(user);
+            res.send({ isAdmin: user?.userRole === 'Admin' });
+        })
+
         //create jwt token
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             //console.log(user);
-            res.send({ accessToken: 'token' })
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' })
+                return res.send({ accessToken: token });
+            }
+            res.status(403).send({ accessToken: '' })
         });
 
     }
