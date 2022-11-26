@@ -47,6 +47,15 @@ async function run() {
             res.send({ isSeller: user?.userRole === 'Seller' });
         })
 
+        //get all sellers api
+        app.get('/sellers', async (req, res) => {
+            const query = {}
+            const users = await usersCollection.find(query).toArray();
+            const sellers = users.filter(user => user?.userRole === 'Seller');
+            //console.log(sellers);
+            res.send(sellers);
+        })
+
         //create jwt token
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
