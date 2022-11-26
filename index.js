@@ -11,6 +11,33 @@ app.use(cors());
 app.use(express.json());
 
 
+//verify the token
+function verifyJWT(req, res, next) {
+
+    //secondly verify here
+    console.log('token from client:', req.headers.authorization);
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send('unauthorized access');
+    }
+
+
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            console.log(err)
+            return res.status(403).send({ message: 'forbidden access' })
+        }
+
+
+        req.decoded = decoded;
+        next();
+    })
+
+}
+
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.klfob8q.mongodb.net/?retryWrites=true&w=majority`;
 // console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -57,7 +84,8 @@ async function run() {
         })
 
         //make a seller verified
-        app.put('/sellers/verified/:id', async (req, res) => {
+        app.put('/sellers/verified/:id', verifyJWT, async (req, res) => {
+
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
             const options = { upsert: true };
