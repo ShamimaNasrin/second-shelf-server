@@ -45,7 +45,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const usersCollection = client.db('secondShelf').collection('users');
-
+        const booksCollection = client.db('secondShelf').collection('books');
 
 
         //sent user info to mongodb
@@ -105,6 +105,13 @@ async function run() {
             const buyers = users.filter(user => user?.userRole !== 'Seller' && user?.userRole !== 'Admin');
             //console.log(buyers);
             res.send(buyers);
+        })
+
+        //send books info to mongoDB
+        app.post('/books', verifyJWT, async (req, res) => {
+            const book = req.body;
+            const result = await booksCollection.insertOne(book);
+            res.send(result);
         })
 
         //create jwt token
