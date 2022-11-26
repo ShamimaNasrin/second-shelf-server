@@ -47,6 +47,18 @@ async function run() {
         const usersCollection = client.db('secondShelf').collection('users');
         const booksCollection = client.db('secondShelf').collection('books');
 
+        //Seller verify middleware
+        const verifySeller = async (req, res, next) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.userRole !== 'Seller') {
+                return res.status(403).send({ message: 'forbidden' })
+            }
+            next();
+        }
+
 
         //sent user info to mongodb
         app.post('/users', async (req, res) => {
@@ -108,11 +120,20 @@ async function run() {
         })
 
         //send books info to mongoDB
-        app.post('/books', verifyJWT, async (req, res) => {
+        app.post('/books', verifyJWT, verifySeller, async (req, res) => {
             const book = req.body;
             const result = await booksCollection.insertOne(book);
             res.send(result);
         })
+
+        //books get api
+        app.get('/books', verifyJWT, verifySeller, async (req, res) => {
+            const query = {};
+            const books = await booksCollection.find(query).toArray();
+            res.send(books);
+        })
+
+
 
         //create jwt token
         app.get('/jwt', async (req, res) => {
