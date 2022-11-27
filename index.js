@@ -255,6 +255,14 @@ async function run() {
             res.send(items);
         })
         //------Buyers end--------
+        //------payment-----------
+        //A single bookeditem api by item id
+        app.get('/bookeditems/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const item = await bookingsCollection.findOne(query);
+            res.send(item);
+        })
 
 
         //create jwt token
