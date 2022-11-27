@@ -46,6 +46,7 @@ async function run() {
     try {
         const usersCollection = client.db('secondShelf').collection('users');
         const booksCollection = client.db('secondShelf').collection('books');
+        const bookingsCollection = client.db('secondShelf').collection('bookings');
 
         //Seller verify middleware
         const verifySeller = async (req, res, next) => {
@@ -106,6 +107,14 @@ async function run() {
             const allBooks = await booksCollection.find(query).toArray();
             //console.log(allBooks);
             res.send(allBooks);
+        });
+
+        //sent booking info to mongodb
+        app.post('/bookings', verifyJWT, async (req, res) => {
+            const bookingData = req.body;
+            //console.log(bookingData);
+            const result = await bookingsCollection.insertOne(bookingData);
+            res.send(result);
         });
 
 
