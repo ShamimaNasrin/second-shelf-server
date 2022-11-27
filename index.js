@@ -49,6 +49,7 @@ async function run() {
         const booksCollection = client.db('secondShelf').collection('books');
         const bookingsCollection = client.db('secondShelf').collection('bookings');
         const reportedItemCollection = client.db('secondShelf').collection('reportItems');
+        const paymentsCollection = client.db('secondShelf').collection('payments');
 
         //Seller verify middleware
         const verifySeller = async (req, res, next) => {
@@ -265,7 +266,7 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const item = await bookingsCollection.findOne(query);
             res.send(item);
-        })
+        });
 
         //payment intent post api (Stripe)
         app.post('/create-payment-intent', async (req, res) => {
@@ -283,7 +284,24 @@ async function run() {
             res.send({
                 clientSecret: paymentIntent.client_secret,
             });
+        });
+
+        //payment api
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const result = await paymentsCollection.insertOne(payment);
+            const id = payment.bookingId
+            const filter = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
+            res.send(result);
         })
+
 
 
         //create jwt token
