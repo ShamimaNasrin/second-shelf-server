@@ -175,7 +175,15 @@ async function run() {
             const query = {}
             const reportitems = await reportedItemCollection.find(query).toArray();
             res.send(reportitems);
-        })
+        });
+
+        //delete a reported items
+        app.delete('/reportitems/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await reportedItemCollection.deleteOne(filter);
+            res.send(result);
+        });
 
         //------Admin end----------
 
