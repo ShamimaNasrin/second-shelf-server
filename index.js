@@ -3,6 +3,7 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 const app = express();
 
@@ -255,6 +256,8 @@ async function run() {
             res.send(items);
         })
         //------Buyers end--------
+
+
         //------payment-----------
         //A single bookeditem api by item id
         app.get('/bookeditems/:id', async (req, res) => {
@@ -262,6 +265,24 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const item = await bookingsCollection.findOne(query);
             res.send(item);
+        })
+
+        //payment intent post api (Stripe)
+        app.post('/create-payment-intent', async (req, res) => {
+            const item = req.body;
+            const price = item.resalePrice;
+            const amount = price * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                "payment_method_types": [
+                    "card"
+                ]
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
         })
 
 
