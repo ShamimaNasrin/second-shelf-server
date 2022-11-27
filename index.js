@@ -15,7 +15,7 @@ app.use(express.json());
 function verifyJWT(req, res, next) {
 
     //secondly verify here
-    console.log('token from client:', req.headers.authorization);
+    //console.log('token from client:', req.headers.authorization);
 
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -133,7 +133,20 @@ async function run() {
             res.send(books);
         })
 
+        //Advertise Book
+        app.put('/books/advertise/:id', verifyJWT, async (req, res) => {
 
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    advertise: true
+                }
+            }
+            const result = await booksCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
 
         //create jwt token
         app.get('/jwt', async (req, res) => {
