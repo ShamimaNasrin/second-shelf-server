@@ -59,6 +59,18 @@ async function run() {
             next();
         }
 
+        //Admin verify middleware
+        const verifyAdmin = async (req, res, next) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.userRole !== 'Admin') {
+                return res.status(403).send({ message: 'forbidden' })
+            }
+            next();
+        }
+
 
         //sent user info to mongodb
         app.post('/users', async (req, res) => {
@@ -85,6 +97,8 @@ async function run() {
             // console.log(user);
             res.send({ isSeller: user?.userRole === 'Seller' });
         });
+
+        //------Admin start----------
 
         //get all sellers api
         app.get('/sellers', async (req, res) => {
@@ -118,6 +132,18 @@ async function run() {
             //console.log(buyers);
             res.send(buyers);
         });
+
+        //delete a User
+        app.delete('/users/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+        //------Admin end----------
+
+        //------Seller start----------
 
         //send books info to mongoDB
         app.post('/books', verifyJWT, verifySeller, async (req, res) => {
@@ -155,6 +181,8 @@ async function run() {
             const result = await booksCollection.deleteOne(filter);
             res.send(result);
         });
+
+        //------Seller end----------
 
         //create jwt token
         app.get('/jwt', async (req, res) => {
