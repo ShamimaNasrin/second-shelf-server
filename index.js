@@ -170,6 +170,13 @@ async function run() {
             res.send(result);
         });
 
+        //get all reported items
+        app.get('/reportitems', async (req, res) => {
+            const query = {}
+            const reportitems = await reportedItemCollection.find(query).toArray();
+            res.send(reportitems);
+        })
+
         //------Admin end----------
 
         //------Seller start----------
