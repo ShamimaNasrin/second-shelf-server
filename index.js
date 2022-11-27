@@ -98,6 +98,17 @@ async function run() {
             res.send({ isSeller: user?.userRole === 'Seller' });
         });
 
+
+        //All books get api
+        app.get('/bookscatgory/:catName', async (req, res) => {
+            const catName = req.params.catName;
+            const query = { category: catName };
+            const allBooks = await booksCollection.find(query).toArray();
+            //console.log(allBooks);
+            res.send(allBooks);
+        });
+
+
         //------Admin start----------
 
         //get all sellers api
@@ -152,12 +163,22 @@ async function run() {
             res.send(result);
         });
 
-        //books get api
-        app.get('/books', verifyJWT, verifySeller, async (req, res) => {
-            const query = {};
+        //get books for a specific seller
+        app.get('/books', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+
+            //check user
+            const decodedEmail = req.decoded.email;
+            //console.log(email,decodedEmail)
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+
+            const query = { email: email };
             const books = await booksCollection.find(query).toArray();
             res.send(books);
-        });
+        })
+
 
         //Advertise Book
         app.put('/books/advertise/:id', verifyJWT, async (req, res) => {
