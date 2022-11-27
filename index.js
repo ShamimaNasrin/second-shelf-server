@@ -210,7 +210,7 @@ async function run() {
             const query = { email: email };
             const books = await booksCollection.find(query).toArray();
             res.send(books);
-        })
+        });
 
 
         //Advertise Book
@@ -237,6 +237,25 @@ async function run() {
         });
 
         //------Seller end----------
+
+        //------Buyers start--------
+        //get booked items for a specific buyer
+        app.get('/bookeditems', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+
+            //check user
+            const decodedEmail = req.decoded.email;
+            //console.log(email,decodedEmail)
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+
+            const query = { buyerEmail: email };
+            const items = await bookingsCollection.find(query).toArray();
+            res.send(items);
+        })
+        //------Buyers end--------
+
 
         //create jwt token
         app.get('/jwt', async (req, res) => {
