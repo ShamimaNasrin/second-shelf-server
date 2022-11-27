@@ -75,7 +75,7 @@ async function run() {
             const user = await usersCollection.findOne(query);
             // console.log(user);
             res.send({ isAdmin: user?.userRole === 'Admin' });
-        })
+        });
 
         //check the user that already loggedin An Seller or not
         app.get('/users/seller/:email', async (req, res) => {
@@ -84,7 +84,7 @@ async function run() {
             const user = await usersCollection.findOne(query);
             // console.log(user);
             res.send({ isSeller: user?.userRole === 'Seller' });
-        })
+        });
 
         //get all sellers api
         app.get('/sellers', async (req, res) => {
@@ -93,7 +93,7 @@ async function run() {
             const sellers = users.filter(user => user?.userRole === 'Seller');
             //console.log(sellers);
             res.send(sellers);
-        })
+        });
 
         //make a seller verified
         app.put('/sellers/verified/:id', verifyJWT, async (req, res) => {
@@ -117,21 +117,21 @@ async function run() {
             const buyers = users.filter(user => user?.userRole !== 'Seller' && user?.userRole !== 'Admin');
             //console.log(buyers);
             res.send(buyers);
-        })
+        });
 
         //send books info to mongoDB
         app.post('/books', verifyJWT, verifySeller, async (req, res) => {
             const book = req.body;
             const result = await booksCollection.insertOne(book);
             res.send(result);
-        })
+        });
 
         //books get api
         app.get('/books', verifyJWT, verifySeller, async (req, res) => {
             const query = {};
             const books = await booksCollection.find(query).toArray();
             res.send(books);
-        })
+        });
 
         //Advertise Book
         app.put('/books/advertise/:id', verifyJWT, async (req, res) => {
@@ -145,6 +145,14 @@ async function run() {
                 }
             }
             const result = await booksCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        //delete a Book
+        app.delete('/books/:id', verifyJWT, verifySeller, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await booksCollection.deleteOne(filter);
             res.send(result);
         });
 
