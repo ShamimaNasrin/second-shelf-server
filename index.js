@@ -48,6 +48,7 @@ async function run() {
         const bookingsCollection = client.db('secondShelf').collection('bookings');
         const reportedItemCollection = client.db('secondShelf').collection('reportItems');
         const paymentsCollection = client.db('secondShelf').collection('payments');
+        const bestBooksCollection = client.db('secondShelf').collection('bestbooks');
 
         //Seller verify middleware
         const verifySeller = async (req, res, next) => {
@@ -148,6 +149,13 @@ async function run() {
             //console.log(reportData);
             const result = await reportedItemCollection.insertOne(reportData);
             res.send(result);
+        });
+
+        //get Best sellerbooks from mongo 
+        app.get('/bestbooks', async (req, res) => {
+            const query = {}
+            const bestbooks = await bestBooksCollection.find(query).toArray();
+            res.send(bestbooks);
         });
 
 
