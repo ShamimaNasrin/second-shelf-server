@@ -23,14 +23,12 @@ function verifyJWT(req, res, next) {
         return res.status(401).send('unauthorized access');
     }
 
-
     const token = authHeader.split(' ')[1];
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
         if (err) {
             console.log(err)
             return res.status(403).send({ message: 'forbidden access' })
         }
-
 
         req.decoded = decoded;
         next();
@@ -84,6 +82,9 @@ async function run() {
             res.send(result);
         });
 
+
+        //----------Custom Hooks apis start-------------
+
         //check the user that already loggedin An Admin or not
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
@@ -101,6 +102,17 @@ async function run() {
             // console.log(user);
             res.send({ isSeller: user?.userRole === 'Seller' });
         });
+
+        //check the Seller verified or not
+        app.get('/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            // console.log(user);
+            res.send({ isVerified: user?.sellerType === 'verified' });
+        });
+
+        //----------Custom Hooks apis end-------------
 
 
         //All books get api
