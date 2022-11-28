@@ -112,6 +112,15 @@ async function run() {
             res.send({ isVerified: user?.sellerType === 'verified' });
         });
 
+        //get all advertised books api
+        app.get('/books/advertised', async (req, res) => {
+            const query = {}
+            const books = await booksCollection.find(query).toArray();
+            const advertisedbooks = books.filter(book => book?.advertise);
+            //console.log(advertisedbooks);
+            res.send(advertisedbooks);
+        });
+
         //----------Custom Hooks apis end-------------
 
 
@@ -227,7 +236,7 @@ async function run() {
         });
 
 
-        //Advertise Book
+        //Advertise a Book
         app.put('/books/advertise/:id', verifyJWT, async (req, res) => {
 
             const id = req.params.id;
