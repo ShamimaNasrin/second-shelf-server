@@ -116,7 +116,7 @@ async function run() {
         app.get('/books/advertised', async (req, res) => {
             const query = {}
             const books = await booksCollection.find(query).toArray();
-            const advertisedbooks = books.filter(book => book?.advertise);
+            const advertisedbooks = books.filter(book => book?.advertise && !book?.paid);
             //console.log(advertisedbooks);
             res.send(advertisedbooks);
         });
@@ -128,7 +128,8 @@ async function run() {
         app.get('/bookscatgory/:catName', async (req, res) => {
             const catName = req.params.catName;
             const query = { category: catName };
-            const allBooks = await booksCollection.find(query).toArray();
+            const books = await booksCollection.find(query).toArray();
+            const allBooks = books.filter(book => !book?.paid);
             //console.log(allBooks);
             res.send(allBooks);
         });
@@ -311,15 +312,21 @@ async function run() {
         app.post('/payments', async (req, res) => {
             const payment = req.body;
             const result = await paymentsCollection.insertOne(payment);
-            const id = payment.bookingId
+            const id = payment.bookingId;
             const filter = { _id: ObjectId(id) }
+
+            //for bookcollection
+            const bookID = payment.bookId;
+            const filterBook = { _id: ObjectId(bookID) }
+
             const updatedDoc = {
                 $set: {
                     paid: true,
                     transactionId: payment.transactionId
                 }
             }
-            const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
+            const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc);
+            const addPaidToBook = await booksCollection.updateOne(filterBook, updatedDoc);
             res.send(result);
         })
 
