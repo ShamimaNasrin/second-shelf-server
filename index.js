@@ -316,7 +316,7 @@ async function run() {
             });
         });
 
-        //payment api
+        //payment apii
         app.post('/payments', async (req, res) => {
             const payment = req.body;
             const result = await paymentsCollection.insertOne(payment);
